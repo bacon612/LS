@@ -101,22 +101,25 @@ loop do
   deck = initialize_deck
   player_cards = []
   dealer_cards = []
+
   loop do
     initial_deal(deck, player_cards, dealer_cards)
     break if tie_bust_win?(player_cards, dealer_cards)
     player_turn(deck, player_cards, dealer_cards)
     break if tie_bust_win?(player_cards, dealer_cards)
-    dealer_turn(deck, player_cards, dealer_cards)
+    dealer_turn(deck, dealer_cards)
     break
   end
+  player_card_value = hand_value(player_cards)
+  dealer_card_value = hand_value(dealer_cards)
   prompt "Dealer's card value is #{hand_value(dealer_cards)}."
   prompt "Player's card value is #{hand_value(player_cards)}."
 
-  if hand_value(dealer_cards) == hand_value(player_cards)
+  if dealer_card_value == player_card_value
     prompt "It's a tie!"
-  elsif hand_value(dealer_cards) > hand_value(player_cards) && hand_value(dealer_cards) <= 21
+  elsif dealer_card_value > player_card_value && dealer_card_value <= 21
     prompt "Dealer wins!"
-  elsif hand_value(dealer_cards) < hand_value(player_cards) && hand_value(player_cards) <= 21
+  elsif dealer_card_value < player_card_value && player_card_value <= 21
     prompt "Player wins!"
   end
 
