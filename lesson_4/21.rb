@@ -19,16 +19,10 @@ def initial_deal(deck, player_cards, dealer_cards)
   player_cards << deck.shuffle!.pop
   dealer_cards << deck.shuffle!.pop
   dealer_cards << deck.shuffle!.pop
-  prompt "Player is dealt #{player_cards}."
-  prompt "Dealer is dealt #{dealer_cards[0]}, ?"
 end
 
-def hit_player(deck, player_cards)
+def hit(deck, player_cards)
   player_cards << deck.shuffle!.pop
-end
-
-def hit_dealer(deck, dealer_cards)
-  dealer_cards << deck.shuffle!.pop
 end
 
 def hand_value(cards)
@@ -57,15 +51,15 @@ end
 def player_turn(deck, player_cards, dealer_cards)
   loop do
     prompt "Player, it's your turn. Do you want to hit or stay?"
-    prompt "type 'hit' or 'stay'"
+    prompt "type 'h' for hit or 's' for stay"
     answer = gets.chomp
-    if answer == 'stay'
+    if answer == 's'
       prompt "Player chooses to stay. Dealer's turn now"
       break
     else
       prompt "Player chooses hit"
-      hit_player(deck, player_cards)
-      prompt "Player's cards are #{player_cards}."
+      hit(deck, player_cards)
+      prompt "Player's cards are #{player_cards}. Player card value is #{hand_value(player_cards)}."
       prompt "Dealer's cards are #{dealer_cards[0]}, ?"
       break if hand_value(player_cards) >= 21
     end
@@ -73,11 +67,19 @@ def player_turn(deck, player_cards, dealer_cards)
   player_cards
 end
 
-def tie_bust_win?(player_cards, dealer_cards)
+# def tie_bust_win?(player_cards, dealer_cards)
+#   if hand_value(player_cards) == 21 || hand_value(dealer_cards) == 21
+#     return true
+#   elsif hand_value(player_cards) > 21 || hand_value(dealer_cards) > 21
+#     prompt "Busted!"
+#     return true
+#   end
+#   false
+# end
+def round_over?(player_cards, dealer_cards)
   if hand_value(player_cards) == 21 || hand_value(dealer_cards) == 21
     return true
   elsif hand_value(player_cards) > 21 || hand_value(dealer_cards) > 21
-    prompt "Busted!"
     return true
   end
   false
@@ -90,10 +92,24 @@ def dealer_turn(deck, dealer_cards)
       break
     else
       prompt "Dealer chooses to hit"
-      hit_dealer(deck, dealer_cards)
+      hit(deck, dealer_cards)
     end
   end
   dealer_cards
+end
+
+def display_results(player_card_value, dealer_card_value)
+  if player_card_value > 21
+    prompt "Player busted, Dealer wins!"
+  elsif dealer_card_value > 21
+    prompt "Dealer busted, Player wins!"
+  elsif dealer_card_value == player_card_value
+    prompt "It's a tie!"
+  elsif dealer_card_value > player_card_value && dealer_card_value <= 21
+    prompt "Dealer wins!"
+  elsif dealer_card_value < player_card_value && player_card_value <= 21
+    prompt "Player wins!"
+  end
 end
 
 loop do
@@ -104,25 +120,18 @@ loop do
 
   loop do
     initial_deal(deck, player_cards, dealer_cards)
-    break if tie_bust_win?(player_cards, dealer_cards)
+    prompt "Player is dealt #{player_cards}. Player card value is #{hand_value(player_cards)}."
+    prompt "Dealer is dealt #{dealer_cards[0]}, ?"
+    break if round_over?(player_cards, dealer_cards)
     player_turn(deck, player_cards, dealer_cards)
-    break if tie_bust_win?(player_cards, dealer_cards)
+    break if round_over?(player_cards, dealer_cards)
     dealer_turn(deck, dealer_cards)
     break
   end
   player_card_value = hand_value(player_cards)
   dealer_card_value = hand_value(dealer_cards)
   prompt "Dealer's card value is #{hand_value(dealer_cards)}."
-  prompt "Player's card value is #{hand_value(player_cards)}."
-
-  if dealer_card_value == player_card_value
-    prompt "It's a tie!"
-  elsif dealer_card_value > player_card_value && dealer_card_value <= 21
-    prompt "Dealer wins!"
-  elsif dealer_card_value < player_card_value && player_card_value <= 21
-    prompt "Player wins!"
-  end
-
+  display_results(player_card_value, dealer_card_value)
   prompt "Thanks for playing 21! Would you like to play again? (y/n)"
   answer = gets.chomp
   break unless answer == 'y'
